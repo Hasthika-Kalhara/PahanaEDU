@@ -47,4 +47,12 @@ public class CustomerService
         customerRepository.findByAccountNumber(accountNumber)
                 .ifPresent(customerRepository::delete);
     }
+
+    public double calculateBill(String accountNumber) {
+        Customer customer = customerRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        double ratePerUnit = 10.0;
+        return customer.getUnitsConsumed() * ratePerUnit;
+    }
+
 }

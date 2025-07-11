@@ -34,6 +34,11 @@ public class CustomerController
         return customerService.getCustomerByAccountNumber(accountNumber);
     }
 
+    @GetMapping("/{accountNumber}/bill")
+    public double getCustomerBill(@PathVariable String accountNumber) {
+        return customerService.calculateBill(accountNumber);
+    }
+
     @PutMapping("/{accountNumber}")
     public Customer updateCustomer(@PathVariable String accountNumber, @RequestBody Customer customer)
     {

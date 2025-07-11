@@ -136,8 +136,10 @@
               <td>${c.address}</td>
               <td>${c.unitsConsumed}</td>
               <td>
-                <button class="btn btn-sm btn-warning me-2" onclick="editCustomer('${c.accountNumber}')">Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteCustomer('${c.accountNumber}')">Delete</button>
+                <button class="btn btn-sm btn-warning me-2" onclick="editCustomer('${c.accountNumber}')">✏ Edit</button>
+                <button class="btn btn-sm btn-danger me-2" onclick="deleteCustomer('${c.accountNumber}')">🗑 Delete</button>
+                <button class="btn btn-sm btn-info me-2" onclick="calculateBill('${c.accountNumber}', '${c.name}', false)">🧾 Bill</button>
+                <button class="btn btn-sm btn-success" onclick="calculateBill('${c.accountNumber}', '${c.name}', true)">📄 Get PDF</button>
               </td>
             `;
 
@@ -180,7 +182,74 @@
         document.getElementById("accountNumber").disabled = true;
     }
 
+    let currentBillData = {};
+
+    async function calculateBill(accountNumber, name, autoDownloadPDF = false) {
+        const res = await fetch(`${apiUrl}/${accountNumber}/bill`);
+        if (!res.ok) {
+            alert("Unable to calculate bill.");
+            return;
+        }
+
+        const billAmount = await res.json();
+        currentBillData = {
+            name,
+            accountNumber,
+            amount: billAmount
+        };
+
+        if (autoDownloadPDF) {
+            downloadPDF();
+        } else {
+            const htmlContent = `
+              <p><strong>Customer:</strong> ${name}</p>
+              <p><strong>Account Number:</strong> ${accountNumber}</p>
+              <p><strong>Bill Amount:</strong> Rs. ${billAmount.toFixed(2)}</p>
+            `;
+            document.getElementById("billContent").innerHTML = htmlContent;
+
+            const modal = new bootstrap.Modal(document.getElementById('billModal'));
+            modal.show();
+        }
+    }
+
+    async function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFontSize(16);
+        doc.text("Pahana Edu - Customer Bill", 20, 20);
+        doc.setFontSize(12);
+        doc.text(`Customer Name: ${currentBillData.name}`, 20, 40);
+        doc.text(`Account Number: ${currentBillData.accountNumber}`, 20, 50);
+        doc.text(`Bill Amount: Rs. ${currentBillData.amount.toFixed(2)}`, 20, 60);
+
+        doc.save(`Bill_${currentBillData.accountNumber}.pdf`);
+    }
+
+
 </script>
+
+<!-- Bill Modal -->
+<div class="modal fade" id="billModal" tabindex="-1" aria-labelledby="billModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="billModalLabel">Customer Bill</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="billContent">
+                <!-- Bill details will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 </body>
 </html>
