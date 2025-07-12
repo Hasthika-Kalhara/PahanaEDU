@@ -8,7 +8,7 @@ import org.web.pahanaedu.service.CustomerService;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "*") //This allows access from frontend
+@CrossOrigin(origins = "http://localhost:63342")
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerController
