@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class DatabaseUtil
 {
-    private static final String JDBC_URL = "jdbc:h2:~/pahanaedu"; // Or use jdbc:h2:mem:pahanaedu for in-memory
+    private static final String JDBC_URL = "jdbc:h2:tcp://localhost/~/pahanaedu";
     private static final String USER = "sa";
     private static final String PASSWORD = "";
 

@@ -4,6 +4,8 @@ import org.web.pahanaedu.model.Customer;
 import org.web.pahanaedu.util.DatabaseUtil;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CustomerDAO {
     public static boolean addCustomer(Customer customer) {
@@ -61,5 +63,40 @@ public class CustomerDAO {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static List<Customer> getAllCustomers() {
+        List<Customer> customers = new ArrayList<>();
+        try (Connection conn = DatabaseUtil.getConnection()) {
+            String sql = "SELECT * FROM customers";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Customer c = new Customer();
+                c.setId(rs.getInt("id"));
+                c.setAccountNo(rs.getString("account_no"));
+                c.setName(rs.getString("name"));
+                c.setAddress(rs.getString("address"));
+                c.setPhone(rs.getString("phone"));
+                c.setUnits(rs.getInt("units"));
+                customers.add(c);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return customers;
+    }
+
+    public static boolean deleteCustomer(String accountNo) {
+        try (Connection conn = DatabaseUtil.getConnection()) {
+            String sql = "DELETE FROM customers WHERE account_no = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, accountNo);
+            return stmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
