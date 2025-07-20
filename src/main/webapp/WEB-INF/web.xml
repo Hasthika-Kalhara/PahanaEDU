@@ -29,6 +29,15 @@
         <url-pattern>/customers</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>RoleManagementServlet</servlet-name>
+        <servlet-class>org.web.pahanaedu.controller.RoleManagementServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RoleManagementServlet</servlet-name>
+        <url-pattern>/role-management</url-pattern>
+    </servlet-mapping>
+
     <!-- Item Servlet Mapping -->
     <servlet>
         <servlet-name>ItemServlet</servlet-name>
