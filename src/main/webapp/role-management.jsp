@@ -88,7 +88,7 @@
         </tbody>
     </table>
 
-    <a href="add-customer.html" class="btn btn-secondary">Back to Dashboard</a>
+    <a href="admin-dashboard.jsp" class="btn btn-secondary">Back to Dashboard</a>
 </div>
 </body>
 </html>

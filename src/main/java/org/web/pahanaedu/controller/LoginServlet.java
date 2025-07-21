@@ -17,7 +17,7 @@ public class LoginServlet extends HttpServlet {
         if (AdminDAO.validateAdmin(username, password)) {
             HttpSession session = request.getSession();
             session.setAttribute("admin", username);
-            response.sendRedirect("add-customer.html");
+            response.sendRedirect("admin-dashboard.jsp");
         } else {
             request.setAttribute("error", "Invalid credentials");
             request.getRequestDispatcher("login.jsp").forward(request, response);

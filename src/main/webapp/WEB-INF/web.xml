@@ -59,6 +59,15 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>DashboardServlet</servlet-name>
+        <servlet-class>org.web.pahanaedu.controller.DashboardServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DashboardServlet</servlet-name>
+        <url-pattern>/admin-dashboard</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>H2Console</servlet-name>
         <servlet-class>org.h2.server.web.WebServlet</servlet-class>
     </servlet>

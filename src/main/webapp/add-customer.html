@@ -65,6 +65,7 @@
             <tbody><!-- Rows added by JS --></tbody>
         </table>
     </div>
+    <a href="admin-dashboard.jsp" class="btn btn-secondary">Back to Dashboard</a>
 </div>
 
 <!-- Bill Modal -->
@@ -123,9 +124,9 @@
         <td>${c.phone}</td>
         <td>${c.units}</td>
         <td>
-          <button class="btn btn-primary btn-sm me-1 edit" data-account="${c.accountNo}">Edit</button>
-          <button class="btn btn-danger btn-sm me-1 delete" data-account="${c.accountNo}">Delete</button>
-          <button class="btn btn-info btn-sm bill" data-account="${c.accountNo}">Bill</button>
+          <button class="btn btn-primary btn-sm me-1 edit" data-account="${c.accountNo}">✏Edit</button>
+          <button class="btn btn-danger btn-sm me-1 delete" data-account="${c.accountNo}">🗑Delete</button>
+          <button class="btn btn-info btn-sm bill" data-account="${c.accountNo}">🧾Bill</button>
         </td>`;
             tbody.appendChild(tr);
         });
