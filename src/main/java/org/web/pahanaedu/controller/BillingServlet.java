@@ -12,50 +12,68 @@ import org.web.pahanaedu.model.Customer;
 import java.io.IOException;
 
 @WebServlet("/billing/calculate")
-public class BillingServlet extends HttpServlet
-{
-    private final ObjectMapper mapper = new ObjectMapper();
+public class BillingServlet extends HttpServlet {
 
+    private final ObjectMapper mapper = new ObjectMapper();
+    private static final double RATE_PER_UNIT = 50.0;
+
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
-        throws ServletException, IOException
-    {
+            throws ServletException, IOException {
+
+        res.setContentType("application/json");
+        res.setCharacterEncoding("UTF-8");
+
         String accountNo = req.getParameter("accountNo");
 
-        Customer customer = CustomerDAO.getCustomerByAccountNo(accountNo);
-        if(customer == null)
-        {
-            res.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            mapper.writeValue(res.getWriter(), new Error("Customer not found"));
+        if (accountNo == null || accountNo.isEmpty()) {
+            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            mapper.writeValue(res.getWriter(), new Error("Account number is required."));
             return;
         }
 
-        double ratePerUnit = 50.0;
-        double totalBill = customer.getUnits() * ratePerUnit;
+        Customer customer = CustomerDAO.getCustomerByAccountNo(accountNo);
 
-        res.setContentType("application/json");
-        mapper.writeValue(res.getWriter(), new BillingResponse(customer.getName(), customer.getUnits(), totalBill));
+        if (customer == null) {
+            res.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            mapper.writeValue(res.getWriter(), new Error("Customer not found."));
+            return;
+        }
+
+        double totalBill = customer.getUnits() * RATE_PER_UNIT;
+
+        BillingResponse response = new BillingResponse(
+                customer.getName(),
+                customer.getUnits(),
+                RATE_PER_UNIT,
+                totalBill
+        );
+
+        res.setStatus(HttpServletResponse.SC_OK);
+        mapper.writeValue(res.getWriter(), response);
     }
 
-    private static class BillingResponse
-    {
+    // Response DTO
+    private static class BillingResponse {
         public String customerName;
         public int units;
+        public double ratePerUnit;
         public double total;
 
-        public BillingResponse(String customerName, int units, double total)
-        {
+        public BillingResponse(String customerName, int units, double ratePerUnit, double total) {
             this.customerName = customerName;
             this.units = units;
+            this.ratePerUnit = ratePerUnit;
             this.total = total;
         }
     }
 
-    public static class Error
-    {
+    // Error DTO
+    private static class Error {
         public String message;
-        public Error(String msg)
-        {
-            this.message = msg;
+
+        public Error(String message) {
+            this.message = message;
         }
     }
 }
