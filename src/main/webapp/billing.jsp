@@ -111,10 +111,10 @@
                 itemSelect.innerHTML = "";
 
                 items.forEach(item => {
-                    itemMap[item.id] = item; // ✅ Store in map
+                    itemMap[item.id] = item;
 
                     const option = document.createElement("option");
-                    option.value = item.id;
+                    option.value = item.id.toString();
                     option.textContent = item.name;
                     itemSelect.appendChild(option);
                 });
@@ -128,18 +128,15 @@
         const select = document.getElementById("itemSelect");
         const qtyInput = document.getElementById("itemQty");
 
-        const itemId = select.value;
+        const itemId = select.value.toString();
         const quantity = parseInt(qtyInput.value);
 
-        // Validate quantity and itemId
         if (!itemId || isNaN(quantity) || quantity <= 0) {
             alert("Please select a valid item and quantity.");
             return;
         }
 
         const item = itemMap[itemId];
-
-        // Check if item exists in the map
         if (!item) {
             console.error("Item not found for ID:", itemId);
             alert("Invalid item selected.");
@@ -148,14 +145,32 @@
 
         const total = item.price * quantity;
 
-        // Create and insert row
+        // Debugging output
+        console.log("Adding to bill:");
+        console.log("Item Name:", item.name);
+        console.log("Item Price:", item.price);
+        console.log("Quantity:", quantity);
+        console.log("Total:", total);
+
         const row = document.createElement("tr");
-        row.innerHTML = `
-        <td>${item.name}</td>
-        <td>Rs. ${item.price.toFixed(2)}</td>
-        <td>${quantity}</td>
-        <td>Rs. ${total.toFixed(2)}</td>
-    `;
+
+        // Explicitly build each <td> to debug visibility
+        const tdName = document.createElement("td");
+        tdName.textContent = item.name;
+
+        const tdPrice = document.createElement("td");
+        tdPrice.textContent = "Rs. " + Number(item.price).toFixed(2);
+
+        const tdQty = document.createElement("td");
+        tdQty.textContent = quantity;
+
+        const tdTotal = document.createElement("td");
+        tdTotal.textContent = "Rs. " + (Number(item.price) * quantity).toFixed(2);
+
+        row.appendChild(tdName);
+        row.appendChild(tdPrice);
+        row.appendChild(tdQty);
+        row.appendChild(tdTotal);
 
         document.getElementById("billTableBody").appendChild(row);
         updateBillTotal();
@@ -171,40 +186,39 @@
         document.getElementById("finalBillTotal").textContent = "Rs. " + total.toFixed(2);
     }
 
-    window.onload = fetchItems;
+    window.onload = function () {
+        fetchItems();
 
-    // Fetch customer billing info
-    document.getElementById("billingForm").addEventListener("submit", function (e) {
-        e.preventDefault();
+        document.getElementById("billingForm").addEventListener("submit", function (e) {
+            e.preventDefault();
 
-        const accountNo = document.getElementById("accountNo").value;
-        const resultCard = document.getElementById("billingResult");
-        const errorBox = document.getElementById("errorBox");
+            const accountNo = document.getElementById("accountNo").value;
+            const resultCard = document.getElementById("billingResult");
+            const errorBox = document.getElementById("errorBox");
 
-        resultCard.style.display = "none";
-        errorBox.classList.add("d-none");
+            resultCard.style.display = "none";
+            errorBox.classList.add("d-none");
 
-        fetch("billing/calculate?accountNo=" + accountNo)
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => { throw err; });
-                }
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById("customerName").textContent = data.customerName;
-                document.getElementById("units").textContent = data.units;
-                document.getElementById("rate").textContent = "Rs. " + data.ratePerUnit.toFixed(2);
-                document.getElementById("total").textContent = "Rs. " + data.total.toFixed(2);
-                resultCard.style.display = "block";
-            })
-            .catch(err => {
-                errorBox.textContent = err.message || "An error occurred while fetching billing data.";
-                errorBox.classList.remove("d-none");
-            });
-    });
-
-    window.onload = fetchItems;
+            fetch("billing/calculate?accountNo=" + accountNo)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw err; });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById("customerName").textContent = data.customerName;
+                    document.getElementById("units").textContent = data.units;
+                    document.getElementById("rate").textContent = "Rs. " + data.ratePerUnit.toFixed(2);
+                    document.getElementById("total").textContent = "Rs. " + data.total.toFixed(2);
+                    resultCard.style.display = "block";
+                })
+                .catch(err => {
+                    errorBox.textContent = err.message || "An error occurred while fetching billing data.";
+                    errorBox.classList.remove("d-none");
+                });
+        });
+    };
 </script>
 </body>
 </html>
