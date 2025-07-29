@@ -73,6 +73,19 @@
             </a>
         </div>
 
+        <!-- Billing -->
+        <div class="col-md-4">
+            <a href="billing.jsp" class="text-decoration-none">
+                <div class="card bg-warning text-dark dashboard-card p-4 text-center shadow">
+                    <div class="card-body">
+                        <div class="icon mb-3">🧾💳</div>
+                        <h5 class="card-title">Billing</h5>
+                        <p class="card-text">Create and manage customer bills.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
     </div>
 
     <div class="text-center mt-5">

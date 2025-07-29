@@ -96,7 +96,7 @@
         </table>
     </div>
 
-    <a href="dashboard.jsp" class="btn btn-secondary mt-4">Back to Dashboard</a>
+    <a href="admin-dashboard.jsp" class="btn btn-secondary mt-4">Back to Dashboard</a>
 </div>
 
 <!-- Scripts -->
