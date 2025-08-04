@@ -22,6 +22,9 @@
             display: none;
         }
     </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 </head>
 <body>
 <div class="container mt-5">
@@ -95,6 +98,33 @@
             </tfoot>
         </table>
     </div>
+
+    <div id="invoiceSection" style="display:block;">
+        <h3>Invoice</h3>
+        <hr>
+        <p><strong>Customer Name:</strong> <span id="invCustomerName"></span></p>
+        <p><strong>Units:</strong> <span id="invUnits"></span></p>
+        <p><strong>Rate Per Unit:</strong> <span id="invRate"></span></p>
+        <p><strong>Total Usage Bill:</strong> <span id="invUsageTotal"></span></p>
+
+        <h5 class="mt-4">Items</h5>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>Item</th><th>Price</th><th>Qty</th><th>Total</th>
+            </tr>
+            </thead>
+            <tbody id="invItemTable"></tbody>
+            <tfoot>
+            <tr>
+                <td colspan="3"><strong>Final Bill Total</strong></td>
+                <td id="invFinalTotal"></td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <button id="downloadBtn" class="btn btn-outline-primary mt-3" onclick="downloadInvoice()" disabled>Get Invoice</button>
 
     <a href="admin-dashboard.jsp" class="btn btn-secondary mt-4">Back to Dashboard</a>
 </div>
@@ -186,6 +216,101 @@
         document.getElementById("finalBillTotal").textContent = "Rs. " + total.toFixed(2);
     }
 
+    function populateInvoiceSection() {
+        const name = document.getElementById("customerName").textContent.trim();
+        const units = document.getElementById("units").textContent.trim();
+        const rate = document.getElementById("rate").textContent.trim();
+        const total = document.getElementById("total").textContent.trim();
+
+        console.log("INVOICE DATA:");
+        console.log("Customer Name:", name);
+        console.log("Units:", units);
+        console.log("Rate per Unit:", rate);
+        console.log("Total Usage:", total);
+
+        document.getElementById("invCustomerName").textContent = name;
+        document.getElementById("invUnits").textContent = units;
+        document.getElementById("invRate").textContent = rate;
+        document.getElementById("invUsageTotal").textContent = total;
+
+        // Clone item rows
+        const sourceRows = document.querySelectorAll("#billTableBody tr");
+        const invoiceTable = document.getElementById("invItemTable");
+        invoiceTable.innerHTML = "";
+
+        sourceRows.forEach(row => {
+            const clone = row.cloneNode(true);
+            invoiceTable.appendChild(clone);
+        });
+
+        document.getElementById("invFinalTotal").innerText = document.getElementById("finalBillTotal").innerText.trim();
+    }
+
+    async function downloadInvoice() {
+        populateInvoiceSection(); // ensure invoice section is up to date
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        let y = 10;
+
+        doc.setFontSize(16);
+        doc.text("Customer Invoice", 10, y);
+        y += 10;
+
+        console.log("DEBUG: customerName span textContent =", document.getElementById("customerName").textContent);
+        console.log("DEBUG: units span textContent =", document.getElementById("units").textContent);
+        console.log("DEBUG: rate span textContent =", document.getElementById("rate").textContent);
+        console.log("DEBUG: total span textContent =", document.getElementById("total").textContent);
+
+        // Fetch synced invoice fields
+        const name = document.getElementById("invCustomerName").textContent.trim();
+        const units = document.getElementById("invUnits").textContent.trim();
+        const rate = document.getElementById("invRate").textContent.trim();
+        const total = document.getElementById("invUsageTotal").textContent.trim();
+
+        console.log("🚨 FINAL PDF VALUES 🚨");
+        console.log("Name:", name);
+        console.log("Units:", units);
+        console.log("Rate:", rate);
+        console.log("Total:", total);
+
+        // Render text safely
+        doc.setFontSize(12);
+        doc.text(`Customer Name: ${name}`, 10, y); y += 8;
+        doc.text(`Units Used: ${units}`, 10, y); y += 8;
+        doc.text(`Rate per Unit: ${rate}`, 10, y); y += 8;
+        doc.text(`Total Usage Bill: ${total}`, 10, y); y += 12;
+
+        // Table headers
+        doc.setFontSize(14);
+        doc.text("Items:", 10, y); y += 6;
+        doc.setFontSize(12);
+        doc.text("Item", 10, y);
+        doc.text("Price", 60, y);
+        doc.text("Qty", 110, y);
+        doc.text("Total", 150, y);
+        y += 6;
+
+        // Loop through invoice item rows
+        const rows = document.querySelectorAll("#invItemTable tr");
+        rows.forEach(row => {
+            const cols = row.querySelectorAll("td");
+            if (cols.length === 4) {
+                doc.text(cols[0].textContent, 10, y);
+                doc.text(cols[1].textContent, 60, y);
+                doc.text(cols[2].textContent, 110, y);
+                doc.text(cols[3].textContent, 150, y);
+                y += 6;
+            }
+        });
+
+        y += 4;
+        doc.text(`Final Total: ${document.getElementById("invFinalTotal").textContent}`, 10, y);
+
+        doc.save("invoice.pdf");
+    }
+
     window.onload = function () {
         fetchItems();
 
@@ -212,6 +337,9 @@
                     document.getElementById("rate").textContent = "Rs. " + data.ratePerUnit.toFixed(2);
                     document.getElementById("total").textContent = "Rs. " + data.total.toFixed(2);
                     resultCard.style.display = "block";
+
+                    populateInvoiceSection(); // auto sync fields
+                    document.getElementById("downloadBtn").disabled = false;
                 })
                 .catch(err => {
                     errorBox.textContent = err.message || "An error occurred while fetching billing data.";
@@ -219,6 +347,8 @@
                 });
         });
     };
+
+
 </script>
 </body>
 </html>
