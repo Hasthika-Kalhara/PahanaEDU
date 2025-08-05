@@ -24,6 +24,10 @@
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        const { jsPDF } = window.jspdf;
+        window.jsPDF = jsPDF; // expose it globally
+    </script>
 
 </head>
 <body>
@@ -99,8 +103,8 @@
         </table>
     </div>
 
-    <div id="invoiceSection" style="display:block;">
-        <h3>Invoice</h3>
+    <div id="invoiceSection" style="position: absolute; left: -9999px; top: -9999px;">
+    <h3>Invoice</h3>
         <hr>
         <p><strong>Customer Name:</strong> <span id="invCustomerName"></span></p>
         <p><strong>Units:</strong> <span id="invUnits"></span></p>
@@ -247,9 +251,8 @@
     }
 
     async function downloadInvoice() {
-        populateInvoiceSection(); // ensure invoice section is up to date
+        populateInvoiceSection(); // <== force refresh invoice data before generating PDF
 
-        const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
         let y = 10;
@@ -258,33 +261,42 @@
         doc.text("Customer Invoice", 10, y);
         y += 10;
 
-        console.log("DEBUG: customerName span textContent =", document.getElementById("customerName").textContent);
-        console.log("DEBUG: units span textContent =", document.getElementById("units").textContent);
-        console.log("DEBUG: rate span textContent =", document.getElementById("rate").textContent);
-        console.log("DEBUG: total span textContent =", document.getElementById("total").textContent);
+        // ✅ NEW (correct invoice display IDs)
+        const name = (document.getElementById("invCustomerName")?.textContent || "N/A").trim();
+        const units = (document.getElementById("invUnits")?.textContent || "N/A").trim();
+        const rate = (document.getElementById("invRate")?.textContent || "N/A").replace("Rs.", "").trim();
+        const total = (document.getElementById("invUsageTotal")?.textContent || "N/A").replace("Rs.", "").trim();
 
-        // Fetch synced invoice fields
-        const name = document.getElementById("invCustomerName").textContent.trim();
-        const units = document.getElementById("invUnits").textContent.trim();
-        const rate = document.getElementById("invRate").textContent.trim();
-        const total = document.getElementById("invUsageTotal").textContent.trim();
-
-        console.log("🚨 FINAL PDF VALUES 🚨");
-        console.log("Name:", name);
-        console.log("Units:", units);
+        // Final debug check before writing
+        console.log("✅ Cleaned PDF values:");
+        console.log("Customer Name:", name);
+        console.log("Units Used:", units);
         console.log("Rate:", rate);
-        console.log("Total:", total);
+        console.log("Total:", total)
 
-        // Render text safely
+        console.log("lengths → name:", name.length, "rate:", rate.length);
+
         doc.setFontSize(12);
-        doc.text(`Customer Name: ${name}`, 10, y); y += 8;
-        doc.text(`Units Used: ${units}`, 10, y); y += 8;
-        doc.text(`Rate per Unit: ${rate}`, 10, y); y += 8;
-        doc.text(`Total Usage Bill: ${total}`, 10, y); y += 12;
+        doc.text("Customer Name: ", 10, y);
+        doc.text(name, 60, y);
+        y += 8;
+
+        doc.text("Units Used: ", 10, y);
+        doc.text(units, 60, y);
+        y += 8;
+
+        doc.text("Rate per Unit: ", 10, y);
+        doc.text(rate, 60, y);
+        y += 8;
+
+        doc.text("Total Usage Bill: ", 10, y);
+        doc.text(total, 60, y);
+        y += 12;
 
         // Table headers
         doc.setFontSize(14);
         doc.text("Items:", 10, y); y += 6;
+
         doc.setFontSize(12);
         doc.text("Item", 10, y);
         doc.text("Price", 60, y);
@@ -292,21 +304,36 @@
         doc.text("Total", 150, y);
         y += 6;
 
-        // Loop through invoice item rows
-        const rows = document.querySelectorAll("#invItemTable tr");
-        rows.forEach(row => {
-            const cols = row.querySelectorAll("td");
-            if (cols.length === 4) {
-                doc.text(cols[0].textContent, 10, y);
-                doc.text(cols[1].textContent, 60, y);
-                doc.text(cols[2].textContent, 110, y);
-                doc.text(cols[3].textContent, 150, y);
-                y += 6;
-            }
-        });
+        doc.text("Date: " + new Date().toLocaleDateString(), 140, 10);
 
-        y += 4;
-        doc.text(`Final Total: ${document.getElementById("invFinalTotal").textContent}`, 10, y);
+        const rows = document.querySelectorAll("#invItemTable tr");
+        if (rows.length === 0) {
+            doc.text("No items added.", 10, y);
+            y += 6;
+        } else {
+            rows.forEach(row => {
+                const cols = row.querySelectorAll("td");
+                if (cols.length === 4) {
+                    doc.text(cols[0].textContent.trim(), 10, y);
+                    doc.text(cols[1].textContent.trim(), 60, y);
+                    doc.text(cols[2].textContent.trim(), 110, y);
+                    doc.text(cols[3].textContent.trim(), 150, y);
+                    y += 6;
+                }
+            });
+        }
+
+        populateInvoiceSection(); // Refresh latest DOM state
+        const finalTotal = document.getElementById("invFinalTotal")?.textContent?.trim() || "Rs. 0.00";
+
+        y += 10; // Add clear space after last item
+        doc.setFontSize(13);
+        doc.setFont("helvetica", "bold");
+        doc.text("Final Total:", 10, y);
+        doc.text(finalTotal, 60, y);
+
+        console.log("🧾 Final Total:", finalTotal);
+        console.log("Length:", finalTotal.length);
 
         doc.save("invoice.pdf");
     }
