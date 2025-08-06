@@ -3,19 +3,45 @@ package org.web.pahanaedu.dao;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.mindrot.jbcrypt.BCrypt;
 import org.web.pahanaedu.util.DatabaseUtil;
 import org.web.pahanaedu.model.Admin;
 
 public class AdminDAO {
 
-    public static boolean validateAdmin(String username, String password) {
+    public static boolean validateAdmin(String username, String rawPassword) {
         try (Connection conn = DatabaseUtil.getConnection()) {
-            String sql = "SELECT * FROM admin WHERE username=? AND password=?";
+            String sql = "SELECT password FROM admin WHERE username=?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
-            stmt.setString(2, password); // In production, hash this
             ResultSet rs = stmt.executeQuery();
-            return rs.next();
+
+            if (rs.next()) {
+                String storedPassword = rs.getString("password");
+
+                if (storedPassword.startsWith("$2a$") || storedPassword.startsWith("$2b$")) {
+                    // Password is hashed using BCrypt
+                    return BCrypt.checkpw(rawPassword, storedPassword);
+                } else {
+                    // Password is stored in plaintext (legacy)
+                    if (storedPassword.equals(rawPassword)) {
+                        // Password matches, so hash and update the DB with the hash
+                        String hashed = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+                        String updateSql = "UPDATE admin SET password=? WHERE username=?";
+                        try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                            updateStmt.setString(1, hashed);
+                            updateStmt.setString(2, username);
+                            updateStmt.executeUpdate();
+                        }
+                        return true;
+                    } else {
+                        // Password does not match
+                        return false;
+                    }
+                }
+            }
+            return false; // user not found
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -64,12 +90,16 @@ public class AdminDAO {
         return admins;
     }
 
-    public static boolean addAdmin(String username, String password, String role) {
+    public static boolean addAdmin(String username, String rawPassword, String role) {
         try (Connection conn = DatabaseUtil.getConnection()) {
+
+            // Hash the password before storing
+            String hashedPassword = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+
             String sql = "INSERT INTO admin (username, password, role) VALUES (?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
-            stmt.setString(2, password); // You should hash this in production
+            stmt.setString(2, hashedPassword); // store hashed password here
             stmt.setString(3, role);
             return stmt.executeUpdate() > 0;
         } catch (Exception e) {
@@ -86,6 +116,21 @@ public class AdminDAO {
             stmt.setString(2, username);
             return stmt.executeUpdate() > 0;
         } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean deleteAdmin(String username) {
+        String sql = "DELETE FROM admin WHERE username = ?";
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, username);
+            int affected = stmt.executeUpdate();
+            return affected > 0;
+
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }

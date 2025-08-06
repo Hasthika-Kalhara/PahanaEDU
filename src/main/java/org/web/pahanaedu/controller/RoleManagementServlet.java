@@ -46,8 +46,19 @@ public class RoleManagementServlet extends HttpServlet {
             } else {
                 request.setAttribute("error", "Failed to add user. Username might already exist.");
             }
-        }
+        } else if ("delete".equals(action)) {
+            String username = request.getParameter("username");
+            System.out.println("Trying to delete user: " + username); // Debug print
 
-        doGet(request, response); // Refresh page with updated list
+            boolean deleted = AdminDAO.deleteAdmin(username);
+            System.out.println("Deleted? " + deleted); // Debug print
+            if (deleted) {
+                request.setAttribute("success", "User deleted successfully.");
+            } else {
+                request.setAttribute("error", "Failed to delete user.");
+            }
+    }
+
+    doGet(request, response); // Refresh page with updated list
     }
 }

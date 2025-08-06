@@ -73,15 +73,31 @@
             <td><%= admin.getUsername() %></td>
             <td><%= admin.getRole() %></td>
             <td>
-                <form method="post" action="role-management" class="d-flex">
+                <form method="post" action="role-management" class="d-flex me-2">
                     <input type="hidden" name="username" value="<%= admin.getUsername() %>">
                     <input type="hidden" name="action" value="update">
                     <select name="role" class="form-select me-2">
                         <option value="admin" <%= "admin".equals(admin.getRole()) ? "selected" : "" %>>Admin</option>
                         <option value="staff" <%= "staff".equals(admin.getRole()) ? "selected" : "" %>>Staff</option>
                     </select>
-                    <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                    <button type="submit" class="btn btn-primary btn-sm me-2">Update</button>
                 </form>
+
+                <%
+                    String currentAdmin = (String) session.getAttribute("admin");
+                    boolean isSelf = currentAdmin.equals(admin.getUsername());
+                %>
+
+                <!-- Only show delete button if not self -->
+                <% if (!isSelf) { %>
+                <form method="post" action="role-management" onsubmit="return confirm('Are you sure?')">
+                    <input type="hidden" name="username" value="<%= admin.getUsername() %>">
+                    <input type="hidden" name="action" value="delete">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+                <% } else { %>
+                <span class="text-muted">Can't delete yourself</span>
+                <% } %>
             </td>
         </tr>
         <% } %>
