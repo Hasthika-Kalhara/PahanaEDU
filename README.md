@@ -10,7 +10,7 @@ It supports customer and admin management, item (book) handling, billing, authen
 - ✅ Admin & Staff Management  
 - ✅ Customer Management (CRUD operations)  
 - ✅ Item / Book Inventory Management  
-- ✅ Secure Authentication (with BCrypt password hashing)  
+- ✅ Secure Authentication (with BCrypt & Custome password hashing)  
 - ✅ Billing & Invoice Generation  
 - ✅ Help & Support Section  
 - ✅ Database Integration (MySQL)  
