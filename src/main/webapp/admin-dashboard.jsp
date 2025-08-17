@@ -33,11 +33,11 @@
         <p class="text-muted">Manage user accounts and roles</p>
     </div>
 
-    <div class="row g-4 justify-content-center">
+    <div class="row g-4 justify-content-center align-items-stretch">
         <!-- Add Account -->
         <div class="col-md-4">
             <a href="add-customer.html" class="text-decoration-none">
-                <div class="card bg-success text-white dashboard-card p-4 text-center shadow">
+                <div class="card bg-success text-white dashboard-card p-4 text-center shadow h-100">
                     <div class="card-body">
                         <div class="icon mb-3">👤➕</div>
                         <h5 class="card-title">Add Account</h5>
@@ -50,7 +50,7 @@
         <!-- Role Management -->
         <div class="col-md-4">
             <a href="role-management" class="text-decoration-none">
-                <div class="card bg-primary text-white dashboard-card p-4 text-center shadow">
+                <div class="card bg-primary text-white dashboard-card p-4 text-center shadow h-100">
                     <div class="card-body">
                         <div class="icon mb-3">👮‍♂️🔧</div>
                         <h5 class="card-title">Role Management</h5>
@@ -63,7 +63,7 @@
         <!-- Add Items -->
         <div class="col-md-4">
             <a href="items" class="text-decoration-none">
-                <div class="card bg-success text-white dashboard-card p-4 text-center shadow">
+                <div class="card bg-success text-white dashboard-card p-4 text-center shadow h-100">
                     <div class="card-body">
                         <div class="icon mb-3">📚➕</div>
                         <h5 class="card-title">Add Items</h5>
@@ -76,7 +76,7 @@
         <!-- Billing -->
         <div class="col-md-4">
             <a href="billing.jsp" class="text-decoration-none">
-                <div class="card bg-warning text-dark dashboard-card p-4 text-center shadow">
+                <div class="card bg-warning text-dark dashboard-card p-4 text-center shadow h-100">
                     <div class="card-body">
                         <div class="icon mb-3">🧾💳</div>
                         <h5 class="card-title">Billing</h5>
@@ -86,6 +86,18 @@
             </a>
         </div>
 
+        <!-- Help & Support -->
+        <div class="col-md-4">
+            <a href="help.jsp" class="text-decoration-none">
+                <div class="card bg-info text-white dashboard-card p-4 text-center shadow h-100">
+                    <div class="card-body">
+                        <div class="icon mb-3">❓💬</div>
+                        <h5 class="card-title">Help & Support</h5>
+                        <p class="card-text">FAQs, contact info, and support form.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
     </div>
 
     <div class="text-center mt-5">
