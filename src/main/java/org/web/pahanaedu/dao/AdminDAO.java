@@ -5,13 +5,76 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.mindrot.jbcrypt.BCrypt;
-import org.web.pahanaedu.util.DatabaseUtil;
 import org.web.pahanaedu.model.Admin;
+import org.web.pahanaedu.util.DatabaseUtil;
+import org.web.pahanaedu.util.PasswordUtil;
 
 public class AdminDAO {
 
+    // ===========================
+    // Production: no-arg methods
+    // ===========================
+
     public static boolean validateAdmin(String username, String rawPassword) {
         try (Connection conn = DatabaseUtil.getConnection()) {
+            return validateAdmin(username, rawPassword, conn);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static Admin getAdminByUsername(String username) {
+        try (Connection conn = DatabaseUtil.getConnection()) {
+            return getAdminByUsername(username, conn);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static List<Admin> getAllAdmins() {
+        try (Connection conn = DatabaseUtil.getConnection()) {
+            return getAllAdmins(conn);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    public static boolean addAdmin(String username, String rawPassword, String role) {
+        try (Connection conn = DatabaseUtil.getConnection()) {
+            return addAdmin(username, rawPassword, role, conn);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean updateRole(String username, String newRole) {
+        try (Connection conn = DatabaseUtil.getConnection()) {
+            return updateRole(username, newRole, conn);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean deleteAdmin(String username) {
+        try (Connection conn = DatabaseUtil.getConnection()) {
+            return deleteAdmin(username, conn);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // ===========================
+    // Testable: methods with Connection
+    // ===========================
+
+    public static boolean validateAdmin(String username, String rawPassword, Connection conn) {
+        try {
             String sql = "SELECT password FROM admin WHERE username=?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
@@ -21,35 +84,33 @@ public class AdminDAO {
                 String storedPassword = rs.getString("password");
 
                 if (storedPassword.startsWith("$2a$") || storedPassword.startsWith("$2b$")) {
-                    // Password is hashed using BCrypt
-                    return BCrypt.checkpw(rawPassword, storedPassword);
-                } else {
-                    // Password is stored in plaintext (legacy)
-                    if (storedPassword.equals(rawPassword)) {
-                        // Password matches, so hash and update the DB with the hash
-                        String hashed = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+                    // Old BCrypt password
+                    if (BCrypt.checkpw(rawPassword, storedPassword)) {
+                        // Rehash to SHA-256
+                        String shaHash = PasswordUtil.hashPassword(rawPassword);
                         String updateSql = "UPDATE admin SET password=? WHERE username=?";
-                        try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
-                            updateStmt.setString(1, hashed);
-                            updateStmt.setString(2, username);
-                            updateStmt.executeUpdate();
-                        }
+                        PreparedStatement updateStmt = conn.prepareStatement(updateSql);
+                        updateStmt.setString(1, shaHash);
+                        updateStmt.setString(2, username);
+                        updateStmt.executeUpdate();
                         return true;
                     } else {
-                        // Password does not match
                         return false;
                     }
+                } else {
+                    // SHA-256
+                    return PasswordUtil.verifyPassword(rawPassword, storedPassword);
                 }
             }
-            return false; // user not found
+            return false;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public static Admin getAdminByUsername(String username) {
-        try (Connection conn = DatabaseUtil.getConnection()) {
+    public static Admin getAdminByUsername(String username, Connection conn) {
+        try {
             String sql = "SELECT * FROM admin WHERE username=?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
@@ -69,9 +130,9 @@ public class AdminDAO {
         return null;
     }
 
-    public static List<Admin> getAllAdmins() {
+    public static List<Admin> getAllAdmins(Connection conn) {
         List<Admin> admins = new ArrayList<>();
-        try (Connection conn = DatabaseUtil.getConnection()) {
+        try {
             String sql = "SELECT * FROM admin";
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
@@ -90,16 +151,13 @@ public class AdminDAO {
         return admins;
     }
 
-    public static boolean addAdmin(String username, String rawPassword, String role) {
-        try (Connection conn = DatabaseUtil.getConnection()) {
-
-            // Hash the password before storing
-            String hashedPassword = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
-
+    public static boolean addAdmin(String username, String rawPassword, String role, Connection conn) {
+        try {
+            String hashedPassword = PasswordUtil.hashPassword(rawPassword);
             String sql = "INSERT INTO admin (username, password, role) VALUES (?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
-            stmt.setString(2, hashedPassword); // store hashed password here
+            stmt.setString(2, hashedPassword);
             stmt.setString(3, role);
             return stmt.executeUpdate() > 0;
         } catch (Exception e) {
@@ -108,8 +166,8 @@ public class AdminDAO {
         }
     }
 
-    public static boolean updateRole(String username, String newRole) {
-        try (Connection conn = DatabaseUtil.getConnection()) {
+    public static boolean updateRole(String username, String newRole, Connection conn) {
+        try {
             String sql = "UPDATE admin SET role=? WHERE username=?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, newRole);
@@ -121,16 +179,13 @@ public class AdminDAO {
         }
     }
 
-    public static boolean deleteAdmin(String username) {
-        String sql = "DELETE FROM admin WHERE username = ?";
-        try (Connection conn = DatabaseUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+    public static boolean deleteAdmin(String username, Connection conn) {
+        try {
+            String sql = "DELETE FROM admin WHERE username=?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
-            int affected = stmt.executeUpdate();
-            return affected > 0;
-
-        } catch (SQLException e) {
+            return stmt.executeUpdate() > 0;
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }

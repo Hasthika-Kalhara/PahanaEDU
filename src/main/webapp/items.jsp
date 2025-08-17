@@ -18,6 +18,20 @@
 <div class="container mt-5">
     <h3>Item Management</h3>
 
+    <%
+        String message = (String) session.getAttribute("message");
+        if (message != null) {
+    %>
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <%= message %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <%
+            session.removeAttribute("message"); // clear it after showing once
+        }
+    %>
+
+
     <form action="items" method="post" class="row g-3">
         <input type="hidden" name="action" value="add">
         <div class="col-md-4">
