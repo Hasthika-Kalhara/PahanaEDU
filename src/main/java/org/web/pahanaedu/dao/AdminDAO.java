@@ -11,9 +11,7 @@ import org.web.pahanaedu.util.PasswordUtil;
 
 public class AdminDAO {
 
-    // ===========================
-    // Production: no-arg methods
-    // ===========================
+    // no-arg methods
 
     public static boolean validateAdmin(String username, String rawPassword) {
         try (Connection conn = DatabaseUtil.getConnection()) {
@@ -69,9 +67,7 @@ public class AdminDAO {
         }
     }
 
-    // ===========================
-    // Testable: methods with Connection
-    // ===========================
+    // methods with Connection
 
     public static boolean validateAdmin(String username, String rawPassword, Connection conn) {
         try {

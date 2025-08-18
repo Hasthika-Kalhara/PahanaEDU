@@ -9,9 +9,7 @@ import java.util.List;
 
 public class CustomerDAO {
 
-    // ===========================
     // Production methods (no-arg)
-    // ===========================
 
     public static boolean addCustomer(Customer customer) {
         try (Connection conn = DatabaseUtil.getConnection()) {
@@ -58,9 +56,7 @@ public class CustomerDAO {
         }
     }
 
-    // ===========================
     // Testable methods (with Connection)
-    // ===========================
 
     public static boolean addCustomer(Customer customer, Connection conn) {
         String sql = "INSERT INTO customers (account_no, name, address, phone, units) VALUES (?, ?, ?, ?, ?)";
