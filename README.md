@@ -31,5 +31,5 @@ It supports customer and admin management, item (book) handling, billing, authen
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/<your-username>/PahanaEDU.git
+git clone https://github.com/Hasthika-Kalhara/PahanaEDU.git
 cd PahanaEDU
