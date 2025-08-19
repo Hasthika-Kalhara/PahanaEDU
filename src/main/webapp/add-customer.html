@@ -126,7 +126,7 @@
         <td>
           <button class="btn btn-primary btn-sm me-1 edit" data-account="${c.accountNo}">✏Edit</button>
           <button class="btn btn-danger btn-sm me-1 delete" data-account="${c.accountNo}">🗑Delete</button>
-          <button class="btn btn-info btn-sm bill" data-account="${c.accountNo}">🧾Bill</button>
+          <!--<button class="btn btn-info btn-sm bill" data-account="${c.accountNo}">🧾Bill</button>-->
         </td>`;
             tbody.appendChild(tr);
         });
@@ -246,25 +246,25 @@
         }
     });
 
-    document.getElementById('downloadPdfBtn').addEventListener('click', () => {
-        const name = document.getElementById('modalCustomerName').textContent;
-        const units = document.getElementById('modalUnits').textContent;
-        const total = document.getElementById('modalTotal').textContent;
-
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        doc.setFontSize(18);
-        doc.text("Pahana Edu - Electricity Bill", 20, 20);
-
-        doc.setFontSize(12);
-        doc.text(`Customer Name: ${name}`, 20, 40);
-        doc.text(`Units Consumed: ${units}`, 20, 50);
-        doc.text(`Total Amount: Rs. ${total}`, 20, 60);
-        doc.text("Thank you for using our service!", 20, 80);
-
-        doc.save(`bill_${name.replace(/\s+/g, '_')}.pdf`);
-    });
+    // document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+    //     const name = document.getElementById('modalCustomerName').textContent;
+    //     const units = document.getElementById('modalUnits').textContent;
+    //     const total = document.getElementById('modalTotal').textContent;
+    //
+    //     const { jsPDF } = window.jspdf;
+    //     const doc = new jsPDF();
+    //
+    //     doc.setFontSize(18);
+    //     doc.text("Pahana Edu - Electricity Bill", 20, 20);
+    //
+    //     doc.setFontSize(12);
+    //     doc.text(`Customer Name: ${name}`, 20, 40);
+    //     doc.text(`Units Consumed: ${units}`, 20, 50);
+    //     doc.text(`Total Amount: Rs. ${total}`, 20, 60);
+    //     doc.text("Thank you for using our service!", 20, 80);
+    //
+    //     doc.save(`bill_${name.replace(/\s+/g, '_')}.pdf`);
+    // });
 
 
     fetchCustomers();
